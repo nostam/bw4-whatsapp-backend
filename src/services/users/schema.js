@@ -29,7 +29,6 @@ const UserSchema = new Schema(
     role: {
       type: String,
       enum: ["admin", "user"],
-      required: [true, "User role required"],
       default: "user",
     },
     googleId: String,
