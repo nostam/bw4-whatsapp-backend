@@ -26,7 +26,7 @@ usersRouter.post("/login", async (req, res, next) => {
       .send("Welcome back");
   } catch (error) {
     console.log(error);
-    next(error);
+    next(new APIError("Invalid credentials", 401));
   }
 });
 
@@ -36,6 +36,7 @@ usersRouter.post("/register", async (req, res, next) => {
     const { _id } = await newUser.save();
     res.status(201).send({ _id });
   } catch (error) {
+    if (error.code === 11000) error.message = "Email is taken";
     next(error);
   }
 });
@@ -52,7 +53,7 @@ usersRouter.post("/refreshToken", async (req, res, next) => {
         .cookie("refreshToken", refreshToken, refreshTokenOptions)
         .send("renewed");
     } catch (error) {
-      next(error);
+      next(new APIError(error.message, 403));
     }
   }
 });
@@ -115,7 +116,7 @@ usersRouter
         await req.user.save();
         res.status(201).send(req.user);
       } catch (error) {
-        next(error);
+        next(new APIError(error.message, 401));
       }
     }
   )

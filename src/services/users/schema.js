@@ -10,9 +10,12 @@ const UserSchema = new Schema(
     email: {
       type: String,
       unique: true,
-      required: [true, "email required"],
-      minlength: [3, "email must be at least 3 characters"],
+      required: [true, "Email address is required"],
       lowercase: true,
+      match: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        "Please fill a valid email address",
+      ],
       validate: {
         validator: async function (email) {
           const user = await this.constructor.findOne({ email });
@@ -22,10 +25,9 @@ const UserSchema = new Schema(
         message: "email is taken",
       },
     },
-    avatar: {
-      type: String,
-    },
+    avatar: { type: String },
     status: { type: String },
+    desciption: { type: String, maxLength: 280 },
     role: {
       type: String,
       enum: ["admin", "user"],
@@ -46,6 +48,7 @@ UserSchema.methods.toJSON = function () {
   const userObject = user.toObject();
   delete userObject.password;
   delete userObject.__v;
+  delete userObject.refreshTokens;
   return userObject;
 };
 
