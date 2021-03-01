@@ -26,6 +26,7 @@ const UserSchema = new Schema(
       type: String,
     },
     status: { type: String },
+    desciption: { type: String, maxLength: 280 },
     role: {
       type: String,
       enum: ["admin", "user"],
