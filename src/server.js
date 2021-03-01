@@ -12,7 +12,12 @@ const passport = require("passport");
 const cookieParser = require("cookie-parser");
 const oauth = require("./services/auth/oauth");
 
-const usersRoute = require("./services/user");
+const SocketServer = require("./socket")
+const http = require("http")
+const httpServer = http.createServer(server)
+SocketServer(httpServer)
+
+const usersRoute = require("./services/users");
 
 const loggerMiddleware = (req, res, next) => {
   console.log(`Logged ${req.url} ${req.method} -- ${new Date()}`);
@@ -43,7 +48,7 @@ server.use(passport.initialize());
 server.use(loggerMiddleware);
 
 server.use("/users", usersRoute);
-server.use(httpErrorHandler);
+// server.use(httpErrorHandler);
 
 // console.log(listEndpoints(server));
 
@@ -59,7 +64,7 @@ mongoose
     { autoIndex: false }
   )
   .then(() =>
-    server.listen(port, () => {
+    httpServer.listen(port, () => {
       console.log("Running on port", port);
     })
   )
