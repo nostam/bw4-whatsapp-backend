@@ -8,14 +8,22 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
+const avatarStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "whatsapp",
+    folder: "whatsapp/avatars",
+  },
+  limits: { fileSize: 200000 },
+});
+
+const messageStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "whatsapp/messages",
   },
   limits: { fileSize: 5000000 },
 });
 
-const cloudinaryMulter = multer({ storage: storage });
+const cloudinaryMessage = multer({ storage: messageStorage });
 
-module.exports = cloudinaryMulter;
+module.exports = { cloudinaryMessage, cloudinaryAvatar };

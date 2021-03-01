@@ -10,7 +10,7 @@ const {
 const { authorize } = require("../auth/middlewares");
 const { authenticate } = require("../auth");
 const { defaultAvatar } = require("../../utils/users");
-const cloudinaryMulter = require("../../middlewares/cloudinary");
+const { cloudinaryAvatar } = require("../../middlewares/cloudinary");
 
 usersRouter.post("/login", async (req, res, next) => {
   try {
@@ -109,7 +109,7 @@ usersRouter
   .route("/me/avatar")
   .post(
     authorize,
-    cloudinaryMulter.single("avatar"),
+    cloudinaryAvatar.single("avatar"),
     async (req, res, next) => {
       try {
         req.user.avatar = req.file.path;
