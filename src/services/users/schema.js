@@ -25,7 +25,7 @@ const UserSchema = new Schema(
         message: "email is taken",
       },
     },
-    avatar: { type: String },
+    avatar: String,
     status: { type: String },
     desciption: { type: String, maxLength: 280 },
     role: {
