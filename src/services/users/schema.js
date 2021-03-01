@@ -9,16 +9,16 @@ const UserSchema = new Schema(
     email: {
       type: String,
       unique: true,
-      required: [true, "Username required"],
-      minlength: [3, "Username must be at least 3 characters"],
+      required: [true, "email required"],
+      minlength: [3, "email must be at least 3 characters"],
       lowercase: true,
       validate: {
-        validator: async function (username) {
-          const user = await this.constructor.findOne({ username });
-          if (user && user.username === this.username) return true;
+        validator: async function (email) {
+          const user = await this.constructor.findOne({ email });
+          if (user && user.email === this.email) return true;
           return !user ? true : false;
         },
-        message: "Username is taken",
+        message: "email is taken",
       },
     },
     status: { type: String },
@@ -42,8 +42,8 @@ UserSchema.methods.toJSON = function () {
   return userObject;
 };
 
-UserSchema.statics.findByCredentials = async function (username, password) {
-  const user = await this.findOne({ username });
+UserSchema.statics.findByCredentials = async function (email, password) {
+  const user = await this.findOne({ email });
   if (user) {
     const isMatch = await bcrypt.compare(password, user.password);
     if (isMatch) return user;
