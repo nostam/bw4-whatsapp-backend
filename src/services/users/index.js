@@ -9,6 +9,7 @@ const {
 } = require("../../utils");
 const { authorize } = require("../auth/middlewares");
 const { authenticate } = require("../auth");
+const { defaultAvatar } = require("../../utils/users");
 
 usersRouter.post("/login", async (req, res, next) => {
   try {
@@ -103,22 +104,23 @@ usersRouter.get(
 );
 
 usersRouter
-  .route("/me/background")
-  .post(authorize, async (req, res, next) => {
-    try {
-    } catch (error) {
-      next(error);
+  .route("/me/avatar")
+  .post(
+    authorize,
+    cloudinaryMulter.single("avatar"),
+    async (req, res, next) => {
+      try {
+        req.user.avatar = req.file.path;
+        await req.user.save();
+        res.status(201).send(req.user);
+      } catch (error) {
+        next(error);
+      }
     }
-  })
-  .put(authorize, async (req, res, next) => {
-    try {
-    } catch (error) {
-      next(error);
-    }
-  })
+  )
   .delete(authorize, async (req, res, next) => {
     try {
-      req.user.avatar = `https://eu.ui-avatars.com/api/?name=${req.user.firstName}+${req.user.lastName}&background=random&bold=true`;
+      req.user.avatar = defaultAvatar(req.user.firstName, req.user.lastName);
       await req.user.save();
       res.send(req.user);
     } catch (error) {

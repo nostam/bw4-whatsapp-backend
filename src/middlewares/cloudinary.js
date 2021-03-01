@@ -13,6 +13,7 @@ const storage = new CloudinaryStorage({
   params: {
     folder: "whatsapp",
   },
+  limits: { fileSize: 5000000 },
 });
 
 const cloudinaryMulter = multer({ storage: storage });

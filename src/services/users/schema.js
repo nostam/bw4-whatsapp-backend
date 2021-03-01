@@ -1,6 +1,7 @@
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcryptjs");
-const { giveMeAnAvatar } = require("give-me-an-avatar");
+const { defaultAvatar } = require("../../utils/users");
+
 const UserSchema = new Schema(
   {
     firstName: String,
@@ -23,7 +24,7 @@ const UserSchema = new Schema(
     },
     avatar: {
       type: String,
-      default: `https://eu.ui-avatars.com/api/?name=${this.firstName}+${this.lastName}&background=random&bold=true`,
+      default: defaultAvatar(this.firstName, this.lastName),
     },
     status: { type: String },
     role: {
