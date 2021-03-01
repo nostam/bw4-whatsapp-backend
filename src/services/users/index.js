@@ -36,6 +36,7 @@ usersRouter.post("/register", async (req, res, next) => {
     const { _id } = await newUser.save();
     res.status(201).send({ _id });
   } catch (error) {
+    if (error.code === 11000) error.message = "Email is taken";
     next(error);
   }
 });
