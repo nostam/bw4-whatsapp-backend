@@ -1,0 +1,66 @@
+const express = require("express");
+const cors = require("cors");
+
+const server = express();
+const port = process.env.PORT || 3001;
+const helmet = require("helmet");
+const listEndpoints = require("express-list-endpoints");
+const mongoose = require("mongoose");
+const { httpErrorHandler } = require("./utils");
+
+const passport = require("passport");
+const cookieParser = require("cookie-parser");
+const oauth = require("./services/auth/oauth");
+
+const usersRoute = require("./services/user");
+
+const loggerMiddleware = (req, res, next) => {
+  console.log(`Logged ${req.url} ${req.method} -- ${new Date()}`);
+  next();
+};
+
+// const whiteList =
+//   process.env.NODE_ENV === "production"
+//     ? process.env.FE_URL_PROD
+//     : process.env.FE_URL_DEV;
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (whiteList.indexOf(origin) !== -1) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   credentials: true,
+// };
+
+server.use(helmet());
+server.use(cors({ credentials: true, origin: process.env.FE_URL_PROD }));
+server.use(express.json());
+server.use(cookieParser());
+server.use(passport.initialize());
+
+server.use(loggerMiddleware);
+
+server.use("/users", usersRoute);
+server.use(httpErrorHandler);
+
+// console.log(listEndpoints(server));
+
+mongoose
+  .connect(
+    process.env.MONGO_CONNECTION,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+      useCreateIndex: true,
+    },
+    { autoIndex: false }
+  )
+  .then(() =>
+    server.listen(port, () => {
+      console.log("Running on port", port);
+    })
+  )
+  .catch((err) => console.log(err));
