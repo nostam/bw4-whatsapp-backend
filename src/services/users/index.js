@@ -10,6 +10,7 @@ const {
 const { authorize } = require("../auth/middlewares");
 const { authenticate } = require("../auth");
 const { defaultAvatar } = require("../../utils/users");
+const cloudinaryMulter = require("../../middlewares/cloudinary");
 
 usersRouter.post("/login", async (req, res, next) => {
   try {
