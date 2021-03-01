@@ -9,6 +9,8 @@ const {
 } = require("../../utils");
 const { authorize } = require("../auth/middlewares");
 const { authenticate } = require("../auth");
+const { defaultAvatar } = require("../../utils/users");
+const cloudinaryMulter = require("../../middlewares/cloudinary");
 
 usersRouter.post("/login", async (req, res, next) => {
   try {
@@ -32,7 +34,7 @@ usersRouter.post("/register", async (req, res, next) => {
   try {
     const newUser = new UserModel(req.body);
     const { _id } = await newUser.save();
-    res.status(201).send(_id);
+    res.status(201).send({ _id });
   } catch (error) {
     next(error);
   }
@@ -101,6 +103,31 @@ usersRouter.get(
     }
   }
 );
+
+usersRouter
+  .route("/me/avatar")
+  .post(
+    authorize,
+    cloudinaryMulter.single("avatar"),
+    async (req, res, next) => {
+      try {
+        req.user.avatar = req.file.path;
+        await req.user.save();
+        res.status(201).send(req.user);
+      } catch (error) {
+        next(error);
+      }
+    }
+  )
+  .delete(authorize, async (req, res, next) => {
+    try {
+      req.user.avatar = defaultAvatar(req.user.firstName, req.user.lastName);
+      await req.user.save();
+      res.send(req.user);
+    } catch (error) {
+      next(error);
+    }
+  });
 
 usersRouter
   .route("/me")

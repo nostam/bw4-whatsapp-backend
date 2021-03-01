@@ -1,11 +1,12 @@
 const { Schema, model } = require("mongoose");
 const bcrypt = require("bcryptjs");
+const { defaultAvatar } = require("../../utils/users");
 
 const UserSchema = new Schema(
   {
-    firstName: String,
-    lastName: String,
-    password: String,
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    password: { type: String, required: true },
     email: {
       type: String,
       unique: true,
@@ -21,18 +22,24 @@ const UserSchema = new Schema(
         message: "email is taken",
       },
     },
+    avatar: {
+      type: String,
+    },
     status: { type: String },
     role: {
       type: String,
       enum: ["admin", "user"],
-      required: [true, "User role required"],
       default: "user",
     },
     googleId: String,
     refreshTokens: [{ token: { type: String } }],
   },
-  { timestamps: true }
+  { timestamps: true, virtuals: true }
 );
+
+UserSchema.virtual("fullName").get(() => {
+  return `${this.firstName} ${this.lastName}`;
+});
 
 UserSchema.methods.toJSON = function () {
   const user = this;
@@ -56,7 +63,8 @@ UserSchema.statics.findByCredentials = async function (email, password) {
 UserSchema.pre("save", async function (next) {
   const user = this;
   const plainPW = user.password;
-
+  if (user.avatar === undefined)
+    user.avatar = defaultAvatar(user.firstName, user.lastName);
   if (user.isModified("password")) {
     user.password = await bcrypt.hash(plainPW, 10);
   }
