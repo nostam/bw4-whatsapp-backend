@@ -7,10 +7,14 @@ const {
   accessTokenOptions,
   refreshTokenOptions,
 } = require("../../utils");
+const { parse } = require("path");
 const { authorize } = require("../auth/middlewares");
 const { authenticate } = require("../auth");
 const { defaultAvatar } = require("../../utils/users");
-const { cloudinaryAvatar } = require("../../middlewares/cloudinary");
+const {
+  cloudinaryAvatar,
+  cloudinaryDestroy,
+} = require("../../middlewares/cloudinary");
 
 usersRouter.post("/login", async (req, res, next) => {
   try {
@@ -112,6 +116,8 @@ usersRouter
     cloudinaryAvatar.single("avatar"),
     async (req, res, next) => {
       try {
+        const data = parse(req.user.avatar);
+        if (data.name) await cloudinaryDestroy(data);
         req.user.avatar = req.file.path;
         await req.user.save();
         res.status(201).send(req.user);
@@ -122,7 +128,10 @@ usersRouter
   )
   .delete(authorize, async (req, res, next) => {
     try {
+      const data = parse(req.user.avatar);
+      if (data.name) await cloudinaryDestroy(data);
       req.user.avatar = defaultAvatar(req.user.firstName, req.user.lastName);
+      delete req.user.avatar.public_id;
       await req.user.save();
       res.send(req.user);
     } catch (error) {
