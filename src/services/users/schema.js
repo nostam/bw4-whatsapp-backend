@@ -4,9 +4,9 @@ const { defaultAvatar } = require("../../utils/users");
 
 const UserSchema = new Schema(
   {
-    firstName: String,
-    lastName: String,
-    password: String,
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    password: { type: String, required: true },
     email: {
       type: String,
       unique: true,
@@ -24,7 +24,6 @@ const UserSchema = new Schema(
     },
     avatar: {
       type: String,
-      default: defaultAvatar(this.firstName, this.lastName),
     },
     status: { type: String },
     role: {
@@ -36,8 +35,12 @@ const UserSchema = new Schema(
     googleId: String,
     refreshTokens: [{ token: { type: String } }],
   },
-  { timestamps: true }
+  { timestamps: true, virtuals: true }
 );
+
+UserSchema.virtual("fullName").get(() => {
+  return `${this.firstName} ${this.lastName}`;
+});
 
 UserSchema.methods.toJSON = function () {
   const user = this;
@@ -61,7 +64,8 @@ UserSchema.statics.findByCredentials = async function (email, password) {
 UserSchema.pre("save", async function (next) {
   const user = this;
   const plainPW = user.password;
-
+  if (user.avatar === undefined)
+    user.avatar = defaultAvatar(user.firstName, user.lastName);
   if (user.isModified("password")) {
     user.password = await bcrypt.hash(plainPW, 10);
   }
