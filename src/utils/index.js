@@ -19,4 +19,10 @@ const refreshTokenOptions = {
   overwrite: true,
 };
 
+const errorHandler = (err, req, res, next) => {
+  if (!res.headersSent) {
+    res.status(err.httpStatusCode || 500).send({ message: err.message });
+  }
+};
+
 module.exports = { APIError, accessTokenOptions, refreshTokenOptions };

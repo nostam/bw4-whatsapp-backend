@@ -103,6 +103,30 @@ usersRouter.get(
 );
 
 usersRouter
+  .route("/me/background")
+  .post(authorize, async (req, res, next) => {
+    try {
+    } catch (error) {
+      next(error);
+    }
+  })
+  .put(authorize, async (req, res, next) => {
+    try {
+    } catch (error) {
+      next(error);
+    }
+  })
+  .delete(authorize, async (req, res, next) => {
+    try {
+      req.user.avatar = `https://eu.ui-avatars.com/api/?name=${req.user.firstName}+${req.user.lastName}&background=random&bold=true`;
+      await req.user.save();
+      res.send(req.user);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+usersRouter
   .route("/me")
   .get(authorize, async (req, res, next) => {
     try {
