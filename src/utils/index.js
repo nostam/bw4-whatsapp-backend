@@ -11,12 +11,16 @@ const accessTokenOptions = {
   httpOnly: true,
   path: "/",
   overwrite: true,
+  sameSite: "None",
+  secure: true,
 };
 
 const refreshTokenOptions = {
   httpOnly: true,
   path: "/users/refreshToken",
   overwrite: true,
+  sameSite: "None",
+  secure: true,
 };
 
 const httpErrorHandler = (err, req, res, next) => {
