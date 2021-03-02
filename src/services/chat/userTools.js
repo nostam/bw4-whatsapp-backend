@@ -43,7 +43,6 @@ const findBySocketId = async (roomName, socketId) => {
 
 const removeMember = async (socketId, roomName) => {
     try {
-        console.log(roomName, socketId)
         const room = await roomSchema.findOne({ roomName })
         const nickname = room.members.find(member => member.socketId === socketId)
         await roomSchema.findOneAndUpdate(

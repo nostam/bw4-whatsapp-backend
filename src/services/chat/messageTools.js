@@ -1,10 +1,15 @@
-const messageSchema = require("./schema/messageSchema")
+const roomSchema = require("./schema/roomSchema")
 
 const addMessage = async (text, sender, room) => {
     try {
-        const newMessage = new messageSchema({ text: text, sender: sender, room: room })
-        await newMessage.save()
-        return newMessage;
+        const newMessage = await roomSchema.findOneAndUpdate({ roomName: room }, {
+            $addToSet: {
+                messages: { text: text, sender: sender }
+            }
+        });
+        if (newMessage)
+            return true;
+        return false;
     } catch (err) {
         console.log(err)
     }

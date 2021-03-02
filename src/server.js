@@ -18,6 +18,7 @@ const httpServer = http.createServer(server)
 SocketServer(httpServer)
 
 const usersRoute = require("./services/users");
+const chatRoute = require("./services/chat/endpoint");
 
 const loggerMiddleware = (req, res, next) => {
   console.log(`Logged ${req.url} ${req.method} -- ${new Date()}`);
@@ -48,6 +49,7 @@ server.use(passport.initialize());
 server.use(loggerMiddleware);
 
 server.use("/users", usersRoute);
+server.use("/chat", chatRoute);
 // server.use(httpErrorHandler);
 
 // console.log(listEndpoints(server));

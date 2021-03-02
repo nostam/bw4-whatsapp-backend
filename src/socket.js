@@ -25,8 +25,9 @@ const socketServer = server => {
                     sender: user.nickname,
                     room: roomName,
                 }
-                const message = await addMessage(messageContent.text, messageContent.sender, messageContent.room)
-                io.to(message.room).emit("message", message)
+                const newMessage = await addMessage(messageContent.text, messageContent.sender, messageContent.room)
+                if (newMessage = true)
+                    io.to(messageContent.room).emit("message", messageContent.text)
             } catch (err) {
                 console.log(err)
             }

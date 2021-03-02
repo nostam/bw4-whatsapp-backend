@@ -7,21 +7,33 @@ const RoomSchema = new Schema({
     roomName: {
         type: String,
         required: true
-
     },
     creator: {
         type: String,
         required: true
     },
+    admins: [{
+        nickname: { type: String }
+    }],
+    isGroup: {
+        type: Boolean,
+        required: true
+    },
     members: [{
         nickname: {
             type: String,
-            required: true
         }, socketId: {
             type: String,
-            required: true
         }
-    }]
+    }],
+    messages: [{
+        text: { type: String },
+        sender: { type: String }
+    },
+    {
+        timestamps: true
+    }
+    ]
 });
 
 module.exports = model("rooms", RoomSchema);
