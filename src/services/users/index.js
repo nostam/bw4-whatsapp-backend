@@ -7,8 +7,14 @@ const {
   accessTokenOptions,
   refreshTokenOptions,
 } = require("../../utils");
+const { parse } = require("path");
 const { authorize } = require("../auth/middlewares");
 const { authenticate } = require("../auth");
+const { defaultAvatar } = require("../../utils/users");
+const {
+  cloudinaryAvatar,
+  cloudinaryDestroy,
+} = require("../../middlewares/cloudinary");
 
 usersRouter.post("/login", async (req, res, next) => {
   try {
@@ -24,7 +30,7 @@ usersRouter.post("/login", async (req, res, next) => {
       .send("Welcome back");
   } catch (error) {
     console.log(error);
-    next(error);
+    next(new APIError("Invalid credentials", 401));
   }
 });
 
@@ -32,8 +38,9 @@ usersRouter.post("/register", async (req, res, next) => {
   try {
     const newUser = new UserModel(req.body);
     const { _id } = await newUser.save();
-    res.status(201).send(_id);
+    res.status(201).send({ _id });
   } catch (error) {
+    if (error.code === 11000) error.message = "Email is taken";
     next(error);
   }
 });
@@ -50,7 +57,7 @@ usersRouter.post("/refreshToken", async (req, res, next) => {
         .cookie("refreshToken", refreshToken, refreshTokenOptions)
         .send("renewed");
     } catch (error) {
-      next(error);
+      next(new APIError(error.message, 403));
     }
   }
 });
@@ -101,6 +108,36 @@ usersRouter.get(
     }
   }
 );
+
+usersRouter
+  .route("/me/avatar")
+  .post(
+    authorize,
+    cloudinaryAvatar.single("avatar"),
+    async (req, res, next) => {
+      try {
+        const data = parse(req.user.avatar);
+        if (data.name) await cloudinaryDestroy(data);
+        req.user.avatar = req.file.path;
+        await req.user.save();
+        res.status(201).send(req.user);
+      } catch (error) {
+        next(new APIError(error.message, 401));
+      }
+    }
+  )
+  .delete(authorize, async (req, res, next) => {
+    try {
+      const data = parse(req.user.avatar);
+      if (data.name) await cloudinaryDestroy(data);
+      req.user.avatar = defaultAvatar(req.user.firstName, req.user.lastName);
+      delete req.user.avatar.public_id;
+      await req.user.save();
+      res.send(req.user);
+    } catch (error) {
+      next(error);
+    }
+  });
 
 usersRouter
   .route("/me")

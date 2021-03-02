@@ -19,4 +19,16 @@ const refreshTokenOptions = {
   overwrite: true,
 };
 
-module.exports = { APIError, accessTokenOptions, refreshTokenOptions };
+const httpErrorHandler = (err, req, res, next) => {
+  console.log(err);
+  if (!res.headersSent) {
+    res.status(err.httpStatusCode || 500).send({ message: err.message });
+  }
+};
+
+module.exports = {
+  APIError,
+  accessTokenOptions,
+  refreshTokenOptions,
+  httpErrorHandler,
+};
