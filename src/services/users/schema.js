@@ -35,6 +35,7 @@ const UserSchema = new Schema(
     },
     googleId: String,
     refreshTokens: [{ token: { type: String } }],
+    contacts: [{ roomName: String, roomId: String }],
   },
   { timestamps: true, virtuals: true }
 );

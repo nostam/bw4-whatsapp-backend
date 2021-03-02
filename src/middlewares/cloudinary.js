@@ -27,7 +27,6 @@ const messageStorage = new CloudinaryStorage({
 const cloudinaryMessage = multer({ storage: messageStorage });
 const cloudinaryAvatar = multer({ storage: avatarStorage });
 const cloudinaryDestroy = async (data) => {
-  console.log("old pic", data);
   const { dir, name } = data;
   const public_id = `${dir.substr(62, dir.length)}/${name}`;
   await cloudinary.uploader.destroy(public_id, (err, res) => {
