@@ -1,60 +1,40 @@
 const socketio = require("socket.io")
-const roomSchema = require("./services/chat/schema")
+const { addUserToRoom, findBySocketId, removeMember } = require("./services/chat/userTools")
+const addMessage = require("./services/chat/messageTools")
 
 const socketServer = server => {
     const io = socketio(server);
     io.on("connection", socket => {
         socket.on("addUserToRoom", async data => {
             try {
-                const socketId = socket.id
-                const nickname = data.nickname
-                const roomName = data.roomName
-                const user = await roomSchema.findOne({
-                    roomName: roomName,
-                    "members.nickname": nickname,
+                const { nickname, roomName } = await addUserToRoom({
+                    socketId: socket.id,
+                    ...data
                 })
-
-                if (user != null) {
-                    await roomSchema.findOneAndUpdate({
-                        roomName: roomName,
-                        "members.nickname": nickname
-                    }, {
-                        "members.$.socketId": socketId
-                    })
-                } else {
-                    await roomSchema.findOneAndUpdate({
-                        roomName: roomName
-                    }, {
-                        $addToSet: {
-                            members: {
-                                nickname: nickname,
-                                socketId: socketId
-                            }
-                        }
-                    })
-                }
-                return { nickname, roomName }
+                socket.join(roomName)
+                socket.emit("userJoined", `${nickname} joined the group`)
             } catch (error) {
                 console.log(error)
             }
         })
-        socket.on("sendMessageToRoom", async () => {
+        socket.on("sendMessageToRoom", async ({ roomName, text }) => {
             try {
-
+                const user = await findBySocketId(roomName, socket.id)
+                const messageContent = {
+                    text: text,
+                    sender: user.nickname,
+                    room: roomName,
+                }
+                const message = await addMessage(messageContent.text, messageContent.sender, messageContent.room)
+                io.to(message.room).emit("message", message)
             } catch (err) {
                 console.log(err)
             }
         })
-        socket.on("exitFromRoom", async () => {
+        socket.on("exitFromRoom", async (roomName) => {
             try {
-
-            } catch (err) {
-                console.log(err)
-            }
-        })
-        socket.on("removeFromRoom", async () => {
-            try {
-
+                const nickname = await removeMember(socket.id, roomName.roomName)
+                io.to(roomName.roomName).emit("userLeft", `${nickname.nickname} left the group`)
             } catch (err) {
                 console.log(err)
             }
