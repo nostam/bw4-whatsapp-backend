@@ -2,7 +2,7 @@ const {
     Schema,
     model
 } = require("mongoose");
-
+const { UserSchema } = require('../../users/schema')
 const RoomSchema = new Schema({
     roomName: {
         type: String,
@@ -12,9 +12,7 @@ const RoomSchema = new Schema({
         type: String,
         required: true
     },
-    admins: [{
-        nickname: { type: String }
-    }],
+    admins: [UserSchema],
     isGroup: {
         type: Boolean,
         required: true

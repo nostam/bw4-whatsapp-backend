@@ -1,5 +1,6 @@
 const app = require("express").Router();
 const roomSchema = require("../schema/roomSchema")
+const { UserModel } = require("../../users/schema")
 
 app.get('/room/:roomId', async (req, res, next) => {
     try {
@@ -24,16 +25,29 @@ app.post('/room', async (req, res, next) => {
 
 app.put('/room/:roomId/addadmin/:userId', async (req, res, next) => {
     try {
-
+        const newAdmin = await UserModel.findById(req.params.userId)
+        await roomSchema.findByIdAndUpdate(req.params.roomId, {
+            $addToSet: {
+                admins: newAdmin
+            }
+        })
+        res.send("done!")
     } catch (err) {
         console.log(err)
         next(err)
     }
 });
 
-app.put('/room/:roomId/removeadmin/:userId', async (req, res, next) => {
+app.put('/room/:roomId/removeadmin/:adminId', async (req, res, next) => {
     try {
-
+        await roomSchema.findOneAndUpdate(req.params.roomId, {
+            $pull: {
+                'admins': {
+                    '_id': req.params.adminId
+                }
+            }
+        }, { safe: true, upsert: true })
+        res.send("done!")
     } catch (err) {
         console.log(err)
         next(err)
