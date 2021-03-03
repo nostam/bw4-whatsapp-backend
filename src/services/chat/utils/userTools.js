@@ -1,32 +1,33 @@
 const roomSchema = require("../schema/roomSchema")
+const { UserModel } = require("../../users/schema")
 
 const addUserToRoom = async ({ nickname, socketId, roomName }) => {
     try {
-        const user = await roomSchema.findOne({
+        const user = await UserModel.findOne({ nickname })
+        const room = await roomSchema.findOne({
             roomName: roomName,
-            "members.nickname": nickname,
+            'members._id': user._id
         });
-        if (user) {
-            await roomSchema.findOneAndUpdate({
-                roomName: roomName,
-                "members.nickname": nickname
-            }, {
-                "members.$.socketId": socketId
-            });
+
+        console.log("user: " + user._id)
+        console.log("room: " + room)
+        if (room) {
+            await UserModel.findOneAndUpdate({ nickname }, { socketId })
         } else {
             await roomSchema.findOneAndUpdate({
                 roomName: roomName
             }, {
                 $push: {
                     members: {
-                        nickname: nickname,
-                        socketId: socketId
+                        _id: user._id
                     }
                 }
-            });
+            })
+            await UserModel.findOneAndUpdate({ nickname }, { socketId })
         }
         return { nickname, roomName }
     } catch (err) {
+        console.log(err)
         return err
     }
 }

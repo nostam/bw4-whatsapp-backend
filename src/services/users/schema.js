@@ -35,6 +35,7 @@ const UserSchema = new Schema(
       default: "user",
     },
     googleId: String,
+    socketId: String,
     refreshTokens: [{ token: { type: String } }],
     about: { type: String, default: "Hey there! I am using WhatsApp." },
   },

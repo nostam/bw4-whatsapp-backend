@@ -50,7 +50,7 @@ server.use(loggerMiddleware);
 
 server.use("/users", usersRoute);
 server.use("/chat", chatRoute);
-// server.use(httpErrorHandler);
+server.use(httpErrorHandler);
 
 console.log(listEndpoints(server));
 
