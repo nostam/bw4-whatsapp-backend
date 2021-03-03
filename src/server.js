@@ -18,7 +18,7 @@ const httpServer = http.createServer(server)
 SocketServer(httpServer)
 
 const usersRoute = require("./services/users");
-const chatRoute = require("./services/chat/endpoint");
+const chatRoute = require("./services/chat");
 
 const loggerMiddleware = (req, res, next) => {
   console.log(`Logged ${req.url} ${req.method} -- ${new Date()}`);

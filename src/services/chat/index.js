@@ -1,6 +1,6 @@
 const app = require("express").Router();
-const roomSchema = require("../schema/roomSchema")
-const { UserModel } = require("../../users/schema")
+const roomSchema = require("./schema/roomSchema")
+const { UserModel } = require("./../users/schema")
 
 app.get('/room/:roomId', async (req, res, next) => {
     try {
@@ -23,7 +23,7 @@ app.post('/room', async (req, res, next) => {
     }
 });
 
-app.put('/room/:roomId/addadmin/:userId', async (req, res, next) => {
+app.put('/room/:roomId/addAdmin/:userId', async (req, res, next) => {
     try {
         const newAdmin = await UserModel.findById(req.params.userId)
         await roomSchema.findByIdAndUpdate(req.params.roomId, {
@@ -38,7 +38,7 @@ app.put('/room/:roomId/addadmin/:userId', async (req, res, next) => {
     }
 });
 
-app.put('/room/:roomId/removeadmin/:adminId', async (req, res, next) => {
+app.put('/room/:roomId/removeAdmin/:adminId', async (req, res, next) => {
     try {
         await roomSchema.findOneAndUpdate(req.params.roomId, {
             $pull: {
