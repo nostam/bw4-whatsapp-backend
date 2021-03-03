@@ -1,6 +1,6 @@
 const socketio = require("socket.io")
-const { addUserToRoom, findBySocketId, removeMember } = require("./services/chat/userTools")
-const addMessage = require("./services/chat/messageTools")
+const { addUserToRoom, findBySocketId, removeMember } = require("./services/chat/utils/userTools")
+const addMessage = require("./services/chat/utils/messageTools")
 
 const socketServer = server => {
     const io = socketio(server);
@@ -25,9 +25,8 @@ const socketServer = server => {
                     sender: user.nickname,
                     room: roomName,
                 }
-                const newMessage = await addMessage(messageContent.text, messageContent.sender, messageContent.room)
-                if (newMessage = true)
-                    io.to(messageContent.room).emit("message", messageContent.text)
+                await addMessage(messageContent.text, messageContent.sender, messageContent.room)
+                io.to(messageContent.room).emit("message", messageContent.text)
             } catch (err) {
                 console.log(err)
             }

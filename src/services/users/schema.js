@@ -35,6 +35,7 @@ const UserSchema = new Schema(
       default: "user",
     },
     googleId: String,
+    socketId: String,
     refreshTokens: [{ token: { type: String } }],
   },
   { timestamps: true, virtuals: true }
