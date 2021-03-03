@@ -24,7 +24,7 @@ const refreshTokenOptions = {
 };
 
 const httpErrorHandler = (err, req, res, next) => {
-  console.log(err.httpStatusCode);
+  console.log(err);
   if (!res.headersSent) {
     res.status(err.httpStatusCode || 500).send({ message: err.message });
   }
