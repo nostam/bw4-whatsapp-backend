@@ -1,4 +1,4 @@
-const roomSchema = require("./schema/roomSchema")
+const roomSchema = require("../schema/roomSchema")
 
 const addUserToRoom = async ({ nickname, socketId, roomName }) => {
     try {

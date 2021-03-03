@@ -1,4 +1,4 @@
-const roomSchema = require("./schema/roomSchema")
+const roomSchema = require("../schema/roomSchema")
 
 const addMessage = async (text, sender, room) => {
     try {

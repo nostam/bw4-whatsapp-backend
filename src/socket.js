@@ -1,6 +1,6 @@
 const socketio = require("socket.io")
-const { addUserToRoom, findBySocketId, removeMember } = require("./services/chat/userTools")
-const addMessage = require("./services/chat/messageTools")
+const { addUserToRoom, findBySocketId, removeMember } = require("./services/chat/utils/userTools")
+const addMessage = require("./services/chat/utils/messageTools")
 
 const socketServer = server => {
     const io = socketio(server);
