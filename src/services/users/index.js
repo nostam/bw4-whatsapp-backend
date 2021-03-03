@@ -33,6 +33,15 @@ usersRouter.post("/login", async (req, res, next) => {
   }
 });
 
+usersRouter.get("/", async (req, res, next) => {
+  const users = await UserModel.find();
+  try {
+    res.send(users);
+  } catch (error) {
+    next(error);
+  }
+});
+
 usersRouter.post("/register", async (req, res, next) => {
   try {
     const newUser = new UserModel(req.body);

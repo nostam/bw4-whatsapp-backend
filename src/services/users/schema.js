@@ -4,7 +4,7 @@ const { defaultAvatar } = require("../../utils/users");
 
 const UserSchema = new Schema(
   {
-    nickname: { type: String, required: true },
+    nickname: { type: String },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     password: { type: String, required: true },
@@ -36,6 +36,7 @@ const UserSchema = new Schema(
     },
     googleId: String,
     refreshTokens: [{ token: { type: String } }],
+    about: { type: String, default: "Hey there! I am using WhatsApp." },
   },
   { timestamps: true, virtuals: true }
 );

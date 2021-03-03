@@ -12,10 +12,10 @@ const passport = require("passport");
 const cookieParser = require("cookie-parser");
 const oauth = require("./services/auth/oauth");
 
-const SocketServer = require("./socket")
-const http = require("http")
-const httpServer = http.createServer(server)
-SocketServer(httpServer)
+const SocketServer = require("./socket");
+const http = require("http");
+const httpServer = http.createServer(server);
+SocketServer(httpServer);
 
 const usersRoute = require("./services/users");
 const chatRoute = require("./services/chat");
@@ -52,7 +52,7 @@ server.use("/users", usersRoute);
 server.use("/chat", chatRoute);
 // server.use(httpErrorHandler);
 
-// console.log(listEndpoints(server));
+console.log(listEndpoints(server));
 
 mongoose
   .connect(
