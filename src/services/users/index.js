@@ -39,12 +39,9 @@ usersRouter.post("/register", async (req, res, next) => {
     const { _id } = await newUser.save();
     res.status(201).send({ _id });
   } catch (error) {
-    if (error.code === 11000) {
-      const err = new APIError("Email is already in use", 400);
-      next(err);
-    } else {
-      next(error);
-    }
+    if (error.code === 11000)
+      next(new APIError("Email is already in use", 400));
+    next(error);
   }
 });
 
