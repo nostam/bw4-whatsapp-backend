@@ -23,22 +23,39 @@ const socketServer = (server) => {
         console.log(error);
       }
     });
-    socket.on("addUserToRoom", async data => {
-      try {
-        const { nickname, room, isExistent } = await addUserToRoom({
-          socketId: socket.id,
-          ...data
-        })
-        socket.join(room.roomName)
-        if (isExistent === false) {
-          socket.emit("userJoined", `${nickname} joined the group`)
-        } else {
-          console.log(nickname)
+const addUserToRoom = async ({ nickname, socketId, roomId }) => {
+  try {
+    const user = await UserModel.findOne({ nickname });
+    const room = await roomSchema.findOne({
+      _id: roomId,
+      members: user._id,
+    });
+    if (room) {
+      await UserModel.findOneAndUpdate({ nickname }, { socketId });
+      isExistent = true;
+      return { nickname, room, isExistent };
+    } else {
+      await roomSchema.findOneAndUpdate(
+        {
+          _id: roomId,
+        },
+        {
+          $push: {
+            members: {
+              _id: user._id,
+            },
+          },
         }
-      } catch (error) {
-        console.log(error)
-      }
-    })
+      );
+      await UserModel.findOneAndUpdate({ nickname }, { socketId });
+      isExistent = false;
+      return { nickname, room, isExistent };
+    }
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
     socket.on("sendMessageToRoom", async ({ roomId, text }) => {
       try {
         const user = await findBySocketId(socket.id)

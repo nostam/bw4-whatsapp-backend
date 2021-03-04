@@ -1,46 +1,45 @@
 const app = require("express").Router();
 const roomSchema = require("./schema/roomSchema");
 const UserModel = require("./../users/schema");
-// const { authorize } = require("../auth/middlewares");
+const { authorize } = require("../auth/middlewares");
 
-// app.post("/init", authorize, async (req, res, next) => {
-//   try {
-//     //do a search if there is exist room
-//     //if not creat
-
-//     const { to } = req.body;
-//     const newPM = await roomSchema.save({
-//       roomName: `${req.user._id}-${to._id}`,
-//       isGroup: false,
-//       members: [req.user._id, to._id],
-//     });
-//     return newPM.roomName;
-//   } catch (error) {
-//     console.log(err);
-//     return err;
-//   }
-// });
-
-app.get('/room', async (req, res, next) => {
+app.get("/init", authorize, async (req, res, next) => {
   try {
-    const currentRoom = await roomSchema.find()
-    res.status(200).json(currentRoom)
-  } catch (err) {
-    console.log(err)
-    next(err)
+    // route for exisiting rooms
+    // const newPM = await roomSchema.save({
+    //   roomName: `${req.user._id}-${to._id}`,
+    //   isGroup: false,
+    //   members: [req.user._id, to._id],
+    // });
+    const roomList = await roomSchema
+      .find({ members: req.user._id })
+      .sort({ "messages.createdAt": 1 });
+    res.send(roomList);
+  } catch (error) {
+    next(error);
   }
 });
 
-app.post('/room', async (req, res, next) => {
+app.get("/room", async (req, res, next) => {
   try {
-    const newRoom = await new roomSchema(req.body).save()
-    console.log(newRoom)
-    res.status(201).send("group created")
+    const currentRoom = await roomSchema.find();
+    res.status(200).json(currentRoom);
   } catch (err) {
-    console.log(err)
-    next(err)
+    console.log(err);
+    next(err);
   }
-})
+});
+
+app.post("/room", async (req, res, next) => {
+  try {
+    const newRoom = await new roomSchema(req.body).save();
+    console.log(newRoom);
+    res.status(201).send("group created");
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+});
 
 app.get("/room/:roomId", async (req, res, next) => {
   try {
