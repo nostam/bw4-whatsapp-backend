@@ -48,7 +48,9 @@ const socketServer = (server) => {
           messageContent.sender,
           messageContent.room
         );
-        io.to(messageContent.room).emit("message", messageContent.text);
+        socket.boardcast
+          .to(messageContent.room)
+          .emit("message", messageContent.text);
       } catch (err) {
         console.log(err);
       }

@@ -11,7 +11,9 @@ app.get("/init", authorize, async (req, res, next) => {
     //   isGroup: false,
     //   members: [req.user._id, to._id],
     // });
-    const roomList = await roomSchema.find({ members: req.user._id });
+    const roomList = await roomSchema
+      .find({ members: req.user._id })
+      .sort({ "messages.createdAt": 1 });
     res.send(roomList);
   } catch (error) {
     next(error);
