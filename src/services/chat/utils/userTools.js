@@ -63,13 +63,12 @@ const removeMember = async (socketId, roomId) => {
 };
 const initPrivateMessage = async (data) => {
   try {
-    const roomList = await roomSchema
-      .find({ members: req.user._id })
-      .sort({ "messages.createdAt": -1 })
-      .limit({ messages: 20 });
     const { sender, receiver } = data;
-    const roomName = `${sender._id}-${receiver._id}`;
-    roomNameAlt = `${receiver._id}-${sender._id}`;
+    const roomList = await roomSchema
+      .find({ members: sender })
+      .sort({ "messages.createdAt": -1 });
+    const roomName = `${sender}-${receiver}`;
+    roomNameAlt = `${receiver}-${sender}`;
     const foundRoom = await roomSchema.findOne({
       isGroup: false,
       roomName: { $or: [{ roomName }, { roomNameAlt }] },
@@ -78,13 +77,20 @@ const initPrivateMessage = async (data) => {
       return { room: foundRoom, roomList };
     } else {
       const newPM = await roomSchema.save({
-        roomName: `${sender._id}-${receiver._id}`,
+        roomName: `${sender}-${receiver}`,
         isGroup: false,
-        members: [sender._id, receiver._id],
-        messages: [{ text: data.text, sender: sender._id }],
+        members: [sender, receiver],
+        messages: [{ text: data.text, sender: sender }],
       });
-      await UserModel.findByIdAndUpdate(sender._id, { socketId });
-      return { room: newPM, roomList };
+      await UserModel.findByIdAndUpdate(sender, { socketId });
+      const receiver = await UserModel.findById(receiver).project({
+        _id: 1,
+        socketId: 1,
+      });
+      const receiverRoomList = await RoomModel.find({
+        members: req.user._id,
+      }).sort({ "messages.createdAt": 1 });
+      return { room: newPM, roomList, receiver, receiverRoomList };
     }
   } catch (error) {
     console.log(err);
