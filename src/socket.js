@@ -23,49 +23,61 @@ const socketServer = (server) => {
         console.log(error);
       }
     });
-    socket.on("addUserToRoom", async (data) => {
-      try {
-        const { nickname, roomName } = await addUserToRoom({
-          socketId: socket.id,
-          ...data,
-        });
-        socket.join(roomName);
-        socket.emit("userJoined", `${nickname} joined the group`);
-      } catch (error) {
-        console.log(error);
-      }
+const addUserToRoom = async ({ nickname, socketId, roomId }) => {
+  try {
+    const user = await UserModel.findOne({ nickname });
+    const room = await roomSchema.findOne({
+      _id: roomId,
+      members: user._id,
     });
-    socket.on("sendMessageToRoom", async ({ roomName, text }) => {
+    if (room) {
+      await UserModel.findOneAndUpdate({ nickname }, { socketId });
+      isExistent = true;
+      return { nickname, room, isExistent };
+    } else {
+      await roomSchema.findOneAndUpdate(
+        {
+          _id: roomId,
+        },
+        {
+          $push: {
+            members: {
+              _id: user._id,
+            },
+          },
+        }
+      );
+      await UserModel.findOneAndUpdate({ nickname }, { socketId });
+      isExistent = false;
+      return { nickname, room, isExistent };
+    }
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
+    socket.on("sendMessageToRoom", async ({ roomId, text }) => {
       try {
-        const user = await findBySocketId(roomName, socket.id);
+        const user = await findBySocketId(socket.id)
         const messageContent = {
           text: text,
-          sender: user.nickname,
-          room: roomName,
-        };
-        await addMessage(
-          messageContent.text,
-          messageContent.sender,
-          messageContent.room
-        );
-        socket.boardcast
-          .to(messageContent.room)
-          .emit("message", messageContent.text);
+          sender: user._id,
+          room: roomId,
+        }
+        const { currentRoom } = await addMessage(messageContent.text, messageContent.sender, messageContent.room)
+        io.to(currentRoom.roomName).emit("message", messageContent.text)
       } catch (err) {
-        console.log(err);
+        console.log(err)
       }
-    });
-    socket.on("exitFromRoom", async (roomName) => {
+    })
+    socket.on("exitFromRoom", async ({ roomId }) => {
       try {
-        const nickname = await removeMember(socket.id, roomName.roomName);
-        io.to(roomName.roomName).emit(
-          "userLeft",
-          `${nickname.nickname} left the group`
-        );
+        const { user, room } = await removeMember(socket.id, roomId)
+        io.to(room.roomName).emit("userLeft", `${user.nickname} left the group`)
       } catch (err) {
-        console.log(err);
+        console.log(err)
       }
-    });
+    })
   });
 };
 

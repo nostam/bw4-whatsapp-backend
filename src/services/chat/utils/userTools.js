@@ -10,6 +10,8 @@ const addUserToRoom = async ({ nickname, socketId, roomId }) => {
     });
     if (room) {
       await UserModel.findOneAndUpdate({ nickname }, { socketId });
+      isExistent = true;
+      return { nickname, room, isExistent };
     } else {
       await roomSchema.findOneAndUpdate(
         {
@@ -24,8 +26,9 @@ const addUserToRoom = async ({ nickname, socketId, roomId }) => {
         }
       );
       await UserModel.findOneAndUpdate({ nickname }, { socketId });
+      isExistent = false;
+      return { nickname, room, isExistent };
     }
-    return { nickname, room };
   } catch (err) {
     console.log(err);
     return err;
