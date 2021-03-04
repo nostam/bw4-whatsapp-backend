@@ -14,15 +14,14 @@ const socketServer = (server) => {
       // needed info party a & b (id?), but roomName has to be neutral and unique
       try {
         const roomName = await initPrivateMessage({
-            ...data,
-            socketId: socket.id,
-          });
-          socket.join(roomName);
-          socket.emit("PM init successfully", ${roomName})
+          ...data,
+          socketId: socket.id,
+        });
+        socket.join(roomName);
+        socket.emit("PM init successfully", roomName);
       } catch (error) {
-          console.log(error)
+        console.log(error);
       }
-
     });
     socket.on("addUserToRoom", async (data) => {
       try {
