@@ -23,47 +23,40 @@ const socketServer = (server) => {
         console.log(error);
       }
     });
-    socket.on("addUserToRoom", async (data) => {
+    socket.on("addUserToRoom", async data => {
       try {
-        const { nickname, roomName } = await addUserToRoom({
+        const { nickname, room } = await addUserToRoom({
           socketId: socket.id,
-          ...data,
-        });
-        socket.join(roomName);
-        socket.emit("userJoined", `${nickname} joined the group`);
+          ...data
+        })
+        socket.join(room.roomName)
+        socket.emit("userJoined", `${nickname} joined the group`)
       } catch (error) {
-        console.log(error);
+        console.log(error)
       }
-    });
-    socket.on("sendMessageToRoom", async ({ roomName, text }) => {
+    })
+    socket.on("sendMessageToRoom", async ({ roomId, text }) => {
       try {
-        const user = await findBySocketId(roomName, socket.id);
+        const user = await findBySocketId(socket.id)
         const messageContent = {
           text: text,
-          sender: user.nickname,
-          room: roomName,
-        };
-        await addMessage(
-          messageContent.text,
-          messageContent.sender,
-          messageContent.room
-        );
-        io.to(messageContent.room).emit("message", messageContent.text);
+          sender: user._id,
+          room: roomId,
+        }
+        const { currentRoom } = await addMessage(messageContent.text, messageContent.sender, messageContent.room)
+        io.to(currentRoom.roomName).emit("message", messageContent.text)
       } catch (err) {
-        console.log(err);
+        console.log(err)
       }
-    });
-    socket.on("exitFromRoom", async (roomName) => {
+    })
+    socket.on("exitFromRoom", async ({ roomId }) => {
       try {
-        const nickname = await removeMember(socket.id, roomName.roomName);
-        io.to(roomName.roomName).emit(
-          "userLeft",
-          `${nickname.nickname} left the group`
-        );
+        const { user, room } = await removeMember(socket.id, roomId)
+        io.to(room.roomName).emit("userLeft", `${user.nickname} left the group`)
       } catch (err) {
-        console.log(err);
+        console.log(err)
       }
-    });
+    })
   });
 };
 
