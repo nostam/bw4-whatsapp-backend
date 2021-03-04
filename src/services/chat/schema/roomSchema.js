@@ -2,31 +2,21 @@ const {
     Schema,
     model
 } = require("mongoose");
-const { UserSchema } = require('../../users/schema')
 const RoomSchema = new Schema({
     roomName: {
         type: String,
         required: true
     },
-    creator: {
-        type: String,
-        required: true
-    },
-    admins: [UserSchema],
+    creator: { type: Schema.Types.ObjectId, ref: "users" },
+    admins: [{ type: Schema.Types.ObjectId, ref: "users" }],
     isGroup: {
         type: Boolean,
         required: true
     },
-    members: [{
-        nickname: {
-            type: String,
-        }, socketId: {
-            type: String,
-        }
-    }],
+    members: [{ type: Schema.Types.ObjectId, ref: "users" }],
     messages: [{
         text: { type: String },
-        sender: { type: String }
+        sender: { type: Schema.Types.ObjectId, ref: "users" }
     },
     {
         timestamps: true

@@ -4,7 +4,7 @@ const { defaultAvatar } = require("../../utils/users");
 
 const UserSchema = new Schema(
   {
-    nickname: { type: String, required: true },
+    nickname: { type: String },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     password: { type: String, required: true },
@@ -35,7 +35,9 @@ const UserSchema = new Schema(
       default: "user",
     },
     googleId: String,
+    socketId: String,
     refreshTokens: [{ token: { type: String } }],
+    about: { type: String, default: "Hey there! I am using WhatsApp." },
   },
   { timestamps: true, virtuals: true }
 );
@@ -75,4 +77,4 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
-module.exports = { UserModel: model("user", UserSchema), UserSchema };
+module.exports = model("user", UserSchema);

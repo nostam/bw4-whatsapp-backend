@@ -1,4 +1,4 @@
-const UserModel = require("../users/schema");
+const { UserModel } = require("../users/schema");
 const { APIError } = require("../../utils");
 const { verifyJWT } = require("./index");
 
@@ -6,9 +6,9 @@ const authorize = async (req, res, next) => {
   try {
     const token = req.cookies.accessToken;
     const decoded = await verifyJWT(token);
-    const user = await UserModel.findOne({
-      _id: decoded._id,
-    });
+
+    const user = await UserModel.findById(decoded._id);
+
     if (!user) throw new Error();
     req.token = token;
     req.user = user;
