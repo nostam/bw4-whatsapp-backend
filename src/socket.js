@@ -10,6 +10,8 @@ const addMessage = require("./services/chat/utils/messageTools");
 const socketServer = (server) => {
   const io = socketio(server);
   io.on("connection", (socket) => {
+    console.log(socket.id + " is linking");
+
     socket.on("initOneToOne", async (data) => {
       // needed info party a & b (id?), but roomName has to be neutral and unique
       try {
@@ -26,7 +28,9 @@ const socketServer = (server) => {
           socket.join(room._id);
           socket.emit("PM init successfully", room.roomName);
           io.sockets.connected[socket.id].emit("roomList", roomList);
-          if (!receiverIds.socketId) {
+          console.log("receiver socketId", receiverIds.socketId);
+          //TODO not sure if its is emmiting to the opponents
+          if (receiverIds.socketId) {
             io.sockets.connected[receiverIds.socketId].emit(
               "roomList",
               receiverRoomList
