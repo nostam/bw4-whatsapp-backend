@@ -52,7 +52,7 @@ server.use("/users", usersRoute);
 server.use("/chat", chatRoute);
 server.use(httpErrorHandler);
 
-console.log(listEndpoints(server));
+// console.log(listEndpoints(server));
 
 mongoose
   .connect(

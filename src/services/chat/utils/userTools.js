@@ -63,17 +63,44 @@ const removeMember = async (socketId, roomId) => {
 };
 const initPrivateMessage = async (data) => {
   try {
-    const newPM = await roomSchema.save({
-      roomName: `${data.sender._id}-${data.to._id}`,
-      isGroup: false,
-      members: [data.sender._id, data.to._id],
-      messages: [{ text: data.text, sender: data.sender._id }],
+    // data =  { sender: _id, recever: _id}
+    const { sender, receiver } = data;
+    const roomList = await roomSchema
+      .find({ members: sender })
+      .sort({ "messages.createdAt": -1 });
+    const roomName = `${sender}-${receiver}`;
+    roomNameAlt = `${receiver}-${sender}`;
+    const foundRoom = await roomSchema.findOne({
+      $or: [{ roomName: roomName }, { roomName: roomNameAlt }],
     });
-    await UserModel.findByIdAndUpdate(data.sender._id, { socketId });
-    return newPM.roomName;
+    // TODO method project is not a function
+    // const receiverIds = await UserModel.find(receiver).project({
+    //   _id: 1,
+    // });
+    const receiverIds = await UserModel.findById(receiver);
+    const receiverRoomList = await roomSchema.find({
+      members: sender,
+    });
+
+    if (foundRoom) {
+      return { room: foundRoom, roomList, receiverIds, receiverRoomList };
+    } else {
+      const newPM = new roomSchema({
+        roomName,
+        isGroup: false,
+        members: [sender, receiver],
+        messages: [{ text: data.text, sender: sender, createdAt: new Date() }],
+      });
+      await newPM.save({ validateBeforeSave: false });
+      await UserModel.findByIdAndUpdate(sender, { socketId }).project({
+        _id: 1,
+        socketId: 1,
+      });
+      return { room: newPM, roomList, receiverIds, receiverRoomList };
+    }
   } catch (error) {
-    console.log(err);
-    return err;
+    console.log(error);
+    return error;
   }
 };
 

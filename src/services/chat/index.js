@@ -20,6 +20,36 @@ app.get("/init", authorize, async (req, res, next) => {
   }
 });
 
+// app.post("/initPM", authorize, async (req, res, next) => {
+//   try {
+//     const roomList = await roomSchema
+//       .find({ members: req.user._id })
+//       .sort({ "messages.createdAt": 1 });
+//     const sender = req.user;
+//     const { receiver } = receiver;
+//     const roomName = `${sender._id}-${receiver._id}`;
+//     roomNameAlt = `${receiver._id}-${sender._id}`;
+//     const foundRoom = await roomSchema.findOne({
+//       isGroup: false,
+//       roomName: { $or: [{ roomName }, { roomNameAlt }] },
+//     });
+//     if (foundRoom) {
+//       res.send({ room: foundRoom, roomList }); // so it incl msg
+//     } else {
+//       const newPM = await roomSchema.save({
+//         roomName: `${sender._id}-${receiver._id}`,
+//         isGroup: false,
+//         members: [sender._id, receiver._id],
+//         messages: [{ text: data.text, sender: data.sender._id }],
+//       });
+//       await UserModel.findByIdAndUpdate(sender._id, { socketId });
+//       res.status(201).send({ room: newPM, roomList });
+//     }
+//   } catch (error) {
+//     next(error);
+//   }
+// });
+
 app.get("/room", async (req, res, next) => {
   try {
     const currentRoom = await roomSchema.find();
