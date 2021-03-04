@@ -83,7 +83,7 @@ const initPrivateMessage = async (data) => {
         messages: [{ text: data.text, sender: sender }],
       });
       console.log(newPM);
-      await newPM.save();
+      await newPM.save({ validateBeforeSave: false });
       await UserModel.findByIdAndUpdate(sender, { socketId });
 
       const receiverIds = await UserModel.findById(receiver).project({
