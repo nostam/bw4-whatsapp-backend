@@ -1,6 +1,25 @@
 const app = require("express").Router();
 const roomSchema = require("./schema/roomSchema");
 const UserModel = require("./../users/schema");
+const { authorize } = require("../auth/middlewares");
+
+// app.post("/init", authorize, async (req, res, next) => {
+//   try {
+//     //do a search if there is exist room
+//     //if not creat
+
+//     const { to } = req.body;
+//     const newPM = await roomSchema.save({
+//       roomName: `${req.user._id}-${to._id}`,
+//       isGroup: false,
+//       members: [req.user._id, to._id],
+//     });
+//     return newPM.roomName;
+//   } catch (error) {
+//     console.log(err);
+//     return err;
+//   }
+// });
 
 app.get("/room/:roomId", async (req, res, next) => {
   try {
