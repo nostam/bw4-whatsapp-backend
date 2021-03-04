@@ -18,7 +18,7 @@ const socketServer = (server) => {
           socketId: socket.id,
         });
         socket.join(roomName);
-        socket.emit(`PM init successfully ${roomName}`);
+        socket.emit("PM init successfully", roomName);
       } catch (error) {
         console.log(error);
       }
