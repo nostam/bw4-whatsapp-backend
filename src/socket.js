@@ -13,7 +13,12 @@ const socketServer = (server) => {
     socket.on("initOneToOne", async (data) => {
       // needed info party a & b (id?), but roomName has to be neutral and unique
       try {
-        const { room, roomList } = await initPrivateMessage({
+        const {
+          room,
+          roomList,
+          receiverIds,
+          receiverRoomList,
+        } = await initPrivateMessage({
           ...data,
           socketId: socket.id,
         });
@@ -21,10 +26,12 @@ const socketServer = (server) => {
           socket.join(room._id);
           socket.emit("PM init successfully", room.roomName);
           io.sockets.connected[socket.id].emit("roomList", roomList);
-          // io.sockets.connected[receiver.socketId].emit(
-          //   "roomList",
-          //   receiverRoomList
-          // );
+          if (!receiverIds.socketId) {
+            io.sockets.connected[receiverIds.socketId].emit(
+              "roomList",
+              receiverRoomList
+            );
+          }
         }
       } catch (error) {
         console.log(error);
