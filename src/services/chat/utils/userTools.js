@@ -94,8 +94,8 @@ const initPrivateMessage = async (data) => {
       return { room: newPM, roomList, receiver, receiverRoomList };
     }
   } catch (error) {
-    console.log(err);
-    return err;
+    console.log(error);
+    return error;
   }
 };
 
