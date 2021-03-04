@@ -1,61 +1,81 @@
-const roomSchema = require("../schema/roomSchema")
-const { UserModel } = require("../../users/schema");
-const cookieParser = require("cookie-parser");
+const roomSchema = require("../schema/roomSchema");
+const UserModel = require("../../users/schema");
 
-const addUserToRoom = async ({ nickname, socketId, roomId }) => {
-    try {
-        const user = await UserModel.findOne({ nickname })
-        const room = await roomSchema.findOne({
-            _id: roomId,
-            members: user._id
-        });
-        if (room) {
-            await UserModel.findOneAndUpdate({ nickname }, { socketId })
-        } else {
-            await roomSchema.findOneAndUpdate({
-                _id: roomId
-            }, {
-                $push: {
-                    members: {
-                        _id: user._id
-                    }
-                }
-            })
-            await UserModel.findOneAndUpdate({ nickname }, { socketId })
+const addUserToRoom = async ({ nickname, socketId, roomName }) => {
+  try {
+    // why it is nickname but not user _id?
+    const user = await UserModel.findOne({ nickname });
+    const room = await roomSchema.findOne({
+      roomName: roomName,
+      "members._id": user._id,
+    });
+
+    console.log("user: " + user._id);
+    console.log("room: " + room);
+    if (room) {
+      await UserModel.findOneAndUpdate({ nickname }, { socketId });
+    } else {
+      // const newRoom = new RoomModel(
+      //   { roomName },
+      //   {
+      //     $push: {
+      //       members: {
+      //         _id: user._id,
+      //       },
+      //     },
+      //   }
+      // );
+      // await newRoom.save();
+      // // This is not creating a room even room === false, 1o1 user will have to do a post /room request first and this will be come a db IO race beween socketio and REST
+      await roomSchema.findOneAndUpdate(
+        {
+          roomName: roomName,
+        },
+        {
+          $push: {
+            members: {
+              _id: user._id,
+            },
+          },
         }
-        return { nickname, room }
-    } catch (err) {
-        console.log(err)
-        return err
+      );
+      await UserModel.findOneAndUpdate({ nickname }, { socketId });
     }
+    return { nickname, roomName };
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
 };
 
-const findBySocketId = async (socketId) => {
-    try {
-        const user = await UserModel.findOne({ socketId: socketId });
-        // console.log(user)
-        return user
-    } catch (err) {
-        console.log(err)
-        return err
-    }
-}
+const findBySocketId = async (roomName, socketId) => {
+  try {
+    const room = await roomSchema.findOne({ roomName });
+    const user = room.members.find(
+      (nickname) => nickname.socketId === socketId
+    );
+    return user;
+  } catch (err) {
+    return err;
+  }
+};
 
-const removeMember = async (socketId, roomId) => {
-    try {
-        const user = await UserModel.findOne({ socketId: socketId });
-        const room = await roomSchema.findOne({ _id: roomId });
-        const _id = user._id
-        await roomSchema.findOneAndUpdate(
-            { _id: roomId },
-            { $pull: { members: { _id } } }
-        )
-        return { user, room }
-    } catch (err) {
-        console.log(err)
-        return err
-    }
-}
+const removeMember = async (socketId, roomName) => {
+  try {
+    const room = await roomSchema.findOne({ roomName });
+    const nickname = room.members.find(
+      (member) => member.socketId === socketId
+    );
+    await roomSchema.findOneAndUpdate(
+      { roomName },
+      { $pull: { members: { socketId } } }
+    );
+    return nickname;
+  } catch (err) {
+    return err;
+  }
+};
+
 const initPrivateMessage = async (data) => {
   try {
     const newPM = await roomSchema.save({
