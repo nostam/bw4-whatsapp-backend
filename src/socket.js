@@ -25,12 +25,16 @@ const socketServer = (server) => {
     });
     socket.on("addUserToRoom", async data => {
       try {
-        const { nickname, room } = await addUserToRoom({
+        const { nickname, room, isExistent } = await addUserToRoom({
           socketId: socket.id,
           ...data
         })
         socket.join(room.roomName)
-        socket.emit("userJoined", `${nickname} joined the group`)
+        if (isExistent === false) {
+          socket.emit("userJoined", `${nickname} joined the group`)
+        } else {
+          console.log(nickname)
+        }
       } catch (error) {
         console.log(error)
       }
