@@ -3,6 +3,7 @@ const UserModel = require("../../users/schema");
 
 const addUserToRoom = async ({ nickname, socketId, roomName }) => {
   try {
+    // why it is nickname but not user _id?
     const user = await UserModel.findOne({ nickname });
     const room = await roomSchema.findOne({
       roomName: roomName,
@@ -14,6 +15,18 @@ const addUserToRoom = async ({ nickname, socketId, roomName }) => {
     if (room) {
       await UserModel.findOneAndUpdate({ nickname }, { socketId });
     } else {
+      // const newRoom = new RoomModel(
+      //   { roomName },
+      //   {
+      //     $push: {
+      //       members: {
+      //         _id: user._id,
+      //       },
+      //     },
+      //   }
+      // );
+      // await newRoom.save();
+      // // This is not creating a room even room === false, 1o1 user will have to do a post /room request first and this will be come a db IO race beween socketio and REST
       await roomSchema.findOneAndUpdate(
         {
           roomName: roomName,
@@ -63,8 +76,24 @@ const removeMember = async (socketId, roomName) => {
   }
 };
 
+const initPrivateMessage = async (data) => {
+  try {
+    const newPM = await roomSchema.save({
+      roomName: `${data.sender._id}-${data.to._id}`,
+      isGroup: false,
+      members: [data.sender._id, data.to._id],
+      messages: [{ text: data.text, sender: data.sender._id }],
+    });
+    return newPm.roomName;
+  } catch (error) {
+    console.log(err);
+    return err;
+  }
+};
+
 module.exports = {
   addUserToRoom,
   findBySocketId,
   removeMember,
+  initPrivateMessage,
 };
