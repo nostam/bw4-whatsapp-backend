@@ -63,6 +63,7 @@ const removeMember = async (socketId, roomId) => {
 };
 const initPrivateMessage = async (data) => {
   try {
+    // data =  { sender: _id, recever: _id}
     const { sender, receiver } = data;
     const roomList = await roomSchema
       .find({ members: sender })
