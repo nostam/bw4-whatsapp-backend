@@ -63,14 +63,25 @@ const removeMember = async (socketId, roomId) => {
 };
 const initPrivateMessage = async (data) => {
   try {
-    const newPM = await roomSchema.save({
-      roomName: `${data.sender._id}-${data.to._id}`,
+    const { sender, receiver } = data;
+    const roomName = `${sender._id}-${receiver._id}`;
+    roomNameAlt = `${receiver._id}-${sender._id}`;
+    const foundRoom = await roomSchema.findOne({
       isGroup: false,
-      members: [data.sender._id, data.to._id],
-      messages: [{ text: data.text, sender: data.sender._id }],
+      roomName: { $or: [{ roomName }, { roomNameAlt }] },
     });
-    await UserModel.findByIdAndUpdate(data.sender._id, { socketId });
-    return newPM.roomName;
+    if (foundRoom) {
+      return { room: foundRoom, roomList };
+    } else {
+      const newPM = await roomSchema.save({
+        roomName: `${sender._id}-${receiver._id}`,
+        isGroup: false,
+        members: [sender._id, receiver._id],
+        messages: [{ text: data.text, sender: sender._id }],
+      });
+      await UserModel.findByIdAndUpdate(sender._id, { socketId });
+      return { room: newPM, roomList };
+    }
   } catch (error) {
     console.log(err);
     return err;
