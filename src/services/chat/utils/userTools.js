@@ -90,7 +90,6 @@ const initPrivateMessage = async (data) => {
         roomName,
         isGroup: false,
         members: [sender, receiver],
-        messages: [{ text: data.text, sender: sender, createdAt: new Date() }],
       });
       await newPM.save({ validateBeforeSave: false });
       await UserModel.findByIdAndUpdate(sender, { socketId });
