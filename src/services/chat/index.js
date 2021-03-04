@@ -1,7 +1,7 @@
 const app = require("express").Router();
 const roomSchema = require("./schema/roomSchema");
 const UserModel = require("./../users/schema");
-const { authorize } = require("../auth/middlewares");
+// const { authorize } = require("../auth/middlewares");
 
 // app.post("/init", authorize, async (req, res, next) => {
 //   try {
