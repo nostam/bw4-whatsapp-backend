@@ -70,28 +70,30 @@ const initPrivateMessage = async (data) => {
       .sort({ "messages.createdAt": -1 });
     const roomName = `${sender}-${receiver}`;
     roomNameAlt = `${receiver}-${sender}`;
-    console.log(roomName, roomNameAlt);
     const foundRoom = await roomSchema.findOne({
       $or: [{ roomName: roomName }, { roomName: roomNameAlt }],
     });
     if (foundRoom) {
       return { room: foundRoom, roomList };
     } else {
-      const newPM = await roomSchema.save({
-        roomName: `${sender}-${receiver}`,
+      const newPM = new roomSchema({
+        roomName,
         isGroup: false,
         members: [sender, receiver],
         messages: [{ text: data.text, sender: sender }],
       });
+      console.log(newPM);
+      await newPM.save();
       await UserModel.findByIdAndUpdate(sender, { socketId });
-      const receiver = await UserModel.findById(receiver).project({
+
+      const receiverIds = await UserModel.findById(receiver).project({
         _id: 1,
         socketId: 1,
       });
       const receiverRoomList = await RoomModel.find({
         members: req.user._id,
       }).sort({ "messages.createdAt": 1 });
-      return { room: newPM, roomList, receiver, receiverRoomList };
+      return { room: newPM, roomList, receiverIds, receiverRoomList };
     }
   } catch (error) {
     console.log(error);
