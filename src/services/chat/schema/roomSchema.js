@@ -4,6 +4,7 @@ const RoomSchema = new Schema({
     type: String,
     required: true,
   },
+  avatar: {type: String, default: "http://getdrawings.com/free-icon-bw/best-group-icon-for-whatsapp-6.png"}
   creator: { type: Schema.Types.ObjectId, ref: "users" },
   admins: [{ type: Schema.Types.ObjectId, ref: "users" }],
   isGroup: {
