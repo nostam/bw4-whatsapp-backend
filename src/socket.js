@@ -4,6 +4,7 @@ const {
   findBySocketId,
   removeMember,
   initPrivateMessage,
+  getRoomList,
 } = require("./services/chat/utils/userTools");
 const addMessage = require("./services/chat/utils/messageTools");
 
@@ -11,7 +12,16 @@ const socketServer = (server) => {
   const io = socketio(server);
   io.on("connection", (socket) => {
     console.log(socket.id + " is linking");
-
+    //TODO auth with incoming cookies?
+    socket.on("login", async (data) => {
+      //data = {_id}
+      try {
+        const roomList = await getRoomList(data);
+        io.sockets.connected[socket.id].emit("roomList", roomList);
+      } catch (error) {
+        console.log(error);
+      }
+    });
     socket.on("initOneToOne", async (data) => {
       // needed info party a & b (id?), but roomName has to be neutral and unique
       try {
@@ -26,15 +36,13 @@ const socketServer = (server) => {
         });
         if (room) {
           socket.join(room._id);
+          // io.sockets.connected[socket.id] ====socket
           socket.emit("PM init successfully", room.roomName);
           io.sockets.connected[socket.id].emit("roomList", roomList);
           console.log("receiver socketId", receiverIds.socketId);
           //TODO not sure if its is emmiting to the opponents
           if (receiverIds.socketId) {
-            io.sockets.connected[receiverIds.socketId].emit(
-              "roomList",
-              receiverRoomList
-            );
+            socket.to(receiverIds.socketId).emit("roomList", receiverRoomList);
           }
         }
       } catch (error) {
