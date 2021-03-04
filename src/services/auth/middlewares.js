@@ -1,4 +1,4 @@
-const { UserModel } = require("../users/schema");
+const UserModel = require("../users/schema");
 const { APIError } = require("../../utils");
 const { verifyJWT } = require("./index");
 
