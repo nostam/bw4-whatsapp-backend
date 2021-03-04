@@ -85,7 +85,7 @@ const initPrivateMessage = async (data) => {
       messages: [{ text: data.text, sender: data.sender._id }],
     });
     await UserModel.findByIdAndUpdate(data.sender._id, { socketId });
-    return newPm.roomName;
+    return newPM.roomName;
   } catch (error) {
     console.log(err);
     return err;
