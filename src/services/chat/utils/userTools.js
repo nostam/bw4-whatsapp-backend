@@ -1,6 +1,5 @@
 const roomSchema = require("../schema/roomSchema")
 const { UserModel } = require("../../users/schema");
-const cookieParser = require("cookie-parser");
 
 const addUserToRoom = async ({ nickname, socketId, roomId }) => {
     try {
@@ -57,24 +56,24 @@ const removeMember = async (socketId, roomId) => {
     }
 }
 const initPrivateMessage = async (data) => {
-  try {
-    const newPM = await roomSchema.save({
-      roomName: `${data.sender._id}-${data.to._id}`,
-      isGroup: false,
-      members: [data.sender._id, data.to._id],
-      messages: [{ text: data.text, sender: data.sender._id }],
-    });
-    await UserModel.findByIdAndUpdate(data.sender._id, { socketId });
-    return newPM.roomName;
-  } catch (error) {
-    console.log(err);
-    return err;
-  }
+    try {
+        const newPM = await roomSchema.save({
+            roomName: `${data.sender._id}-${data.to._id}`,
+            isGroup: false,
+            members: [data.sender._id, data.to._id],
+            messages: [{ text: data.text, sender: data.sender._id }],
+        });
+        await UserModel.findByIdAndUpdate(data.sender._id, { socketId });
+        return newPM.roomName;
+    } catch (error) {
+        console.log(err);
+        return err;
+    }
 };
 
 module.exports = {
-  addUserToRoom,
-  findBySocketId,
-  removeMember,
-  initPrivateMessage,
+    addUserToRoom,
+    findBySocketId,
+    removeMember,
+    initPrivateMessage,
 };
