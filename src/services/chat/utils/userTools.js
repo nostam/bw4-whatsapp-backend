@@ -72,7 +72,7 @@ const initPrivateMessage = async (data) => {
     roomNameAlt = `${receiver}-${sender}`;
     const foundRoom = await roomSchema.findOne({
       isGroup: false,
-      roomName: { $or: [{ roomName }, { roomNameAlt }] },
+      roomName: { $or: [roomName, roomNameAlt] },
     });
     if (foundRoom) {
       return { room: foundRoom, roomList };
