@@ -28,7 +28,7 @@ const addUserToRoom = async ({ nickname, socketId, roomId }) => {
         console.log(err)
         return err
     }
-}
+};
 
 const findBySocketId = async (socketId) => {
     try {
@@ -56,9 +56,25 @@ const removeMember = async (socketId, roomId) => {
         return err
     }
 }
+const initPrivateMessage = async (data) => {
+  try {
+    const newPM = await roomSchema.save({
+      roomName: `${data.sender._id}-${data.to._id}`,
+      isGroup: false,
+      members: [data.sender._id, data.to._id],
+      messages: [{ text: data.text, sender: data.sender._id }],
+    });
+    await UserModel.findByIdAndUpdate(data.sender._id, { socketId });
+    return newPM.roomName;
+  } catch (error) {
+    console.log(err);
+    return err;
+  }
+};
 
 module.exports = {
-    addUserToRoom,
-    findBySocketId,
-    removeMember
-}
+  addUserToRoom,
+  findBySocketId,
+  removeMember,
+  initPrivateMessage,
+};
