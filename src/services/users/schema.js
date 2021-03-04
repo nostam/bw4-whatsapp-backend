@@ -76,4 +76,4 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
-module.exports = { UserModel: model("user", UserSchema), UserSchema };
+module.exports = model("user", UserSchema);
