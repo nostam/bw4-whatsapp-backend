@@ -14,14 +14,17 @@ const socketServer = (server) => {
   io.on("connection", (socket) => {
     console.log(socket.id + " is linking");
     //TODO make sure all incoming event will update user schema's socketId
+
     socket.on("login", async (data) => {
       // update registered user socket id in db
       // data = { userId }
+
       try {
         const roomList = await getRoomList({
           ...data,
           socketId: socket.id,
         });
+
         socket.emit("roomList", roomList);
       } catch (error) {
         console.log(error);
@@ -54,6 +57,7 @@ const socketServer = (server) => {
         console.log(error);
       }
     });
+
     //create group, only creator
     socket.on("createRoom", async (data) => {
       //data = {senderId, roomName }
@@ -61,47 +65,57 @@ const socketServer = (server) => {
         const res = await createRoom(data);
       } catch (error) {}
     });
+
     socket.on("addUserToRoom", async (data) => {
       try {
-        const { nickname, room, isExistent } = await addUserToRoom({
-          socketId: socket.id,
-          ...data,
-        });
-        socket.join(room.roomName);
-        if (isExistent === false) {
-          socket.emit("userJoined", `${nickname} joined the group`);
-          socket.to(socket.id).emit(roomList);
-        } else {
-          console.log(nickname);
-        }
+        // const { nickname, room, isExistent } = await addUserToRoom({
+        //   socketId: socket.id,
+        //   ...data,
+        // });
+        socket.join(data.roomId);
+        console.log(`${socket.id}, joined ${data.roomId}`);
+        // if (isExistent === false) {
+        //   socket.emit("userJoined", `${nickname} joined the group`);
+        //   socket.to(socket.id).emit(roomList);
+        // } else {
+        //   console.log(nickname);
+        // }
+        console.log(data);
       } catch (error) {
         console.log(error);
       }
     });
+
     socket.on("sendMessageToRoom", async ({ roomId, text, senderId }) => {
       try {
         // const user = await findBySocketId(socket.id);
-        const data = {
-          userId: senderId,
-          socketId: socket.id,
-        };
-        const res = await updateUserSocketId(data);
-        if (res) console.log("updated userDB");
+        // const data = {
+        //   userId: senderId,
+        //   socketId: socket.id,
+        // };
+        // const res = await updateUserSocketId(data);
+        // if (res) console.log("updated userDB");
+
         const messageContent = {
           text,
           sender: senderId,
           room: roomId,
         };
+
+        io.in(roomId).emit("sendMsgBack", messageContent);
+
         const { currentRoom } = await addMessage(
           messageContent.text,
           messageContent.sender,
           messageContent.room
         );
-        io.to(currentRoom.roomName).emit("message", messageContent.text);
+
+        console.log(currentRoom);
       } catch (err) {
         console.log(err);
       }
     });
+
     socket.on("exitFromRoom", async ({ roomId }) => {
       try {
         const { user, room } = await removeMember(socket.id, roomId);
