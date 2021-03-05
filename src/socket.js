@@ -14,14 +14,17 @@ const socketServer = (server) => {
   io.on("connection", (socket) => {
     console.log(socket.id + " is linking");
     //TODO make sure all incoming event will update user schema's socketId
+
     socket.on("login", async (data) => {
       // update registered user socket id in db
       // data = { userId }
+
       try {
         const roomList = await getRoomList({
           ...data,
           socketId: socket.id,
         });
+
         socket.emit("roomList", roomList);
       } catch (error) {
         console.log(error);
@@ -54,6 +57,7 @@ const socketServer = (server) => {
         console.log(error);
       }
     });
+
     //create group, only creator
     socket.on("createRoom", async (data) => {
       //data = {senderId, roomName }
@@ -61,6 +65,7 @@ const socketServer = (server) => {
         const res = await createRoom(data);
       } catch (error) {}
     });
+
     socket.on("addUserToRoom", async (data) => {
       try {
         const { nickname, room, isExistent } = await addUserToRoom({
@@ -78,6 +83,7 @@ const socketServer = (server) => {
         console.log(error);
       }
     });
+
     socket.on("sendMessageToRoom", async ({ roomId, text, senderId }) => {
       try {
         // const user = await findBySocketId(socket.id);
@@ -87,6 +93,7 @@ const socketServer = (server) => {
         };
         const res = await updateUserSocketId(data);
         if (res) console.log("updated userDB");
+
         const messageContent = {
           text,
           sender: senderId,
@@ -97,11 +104,15 @@ const socketServer = (server) => {
           messageContent.sender,
           messageContent.room
         );
-        io.to(currentRoom.roomName).emit("message", messageContent.text);
+
+        socket.emit("sendMsgBack", messageContent);
+
+        // io.to(currentRoom.roomName).emit("message", messageContent.text);
       } catch (err) {
         console.log(err);
       }
     });
+
     socket.on("exitFromRoom", async ({ roomId }) => {
       try {
         const { user, room } = await removeMember(socket.id, roomId);
