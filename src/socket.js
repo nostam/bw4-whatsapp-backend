@@ -56,7 +56,7 @@ const socketServer = (server) => {
     });
     //create group, only creator
     socket.on("createRoom", async (data) => {
-      //data = {sender: userId, roomName }
+      //data = {senderId, roomName }
       try {
         const res = await createRoom(data);
       } catch (error) {}
