@@ -11,6 +11,7 @@ async function createRoom(data) {
   });
   const res = await newRoom.save({ validateBeforeSave: false });
   if (res) {
+    //TODO
     const newRoomList = await getRoomList;
   }
 }
@@ -81,7 +82,8 @@ async function initPrivateMessage(data) {
     const { sender, receiver, socketId } = data;
     const roomList = await roomSchema
       .find({ members: sender })
-      .sort({ "messages.createdAt": -1 });
+      .sort({ "messages.createdAt": -1 })
+      .populate("members");
     const roomName = `${sender}-${receiver}`;
     roomNameAlt = `${receiver}-${sender}`;
     const foundRoom = await roomSchema.findOne({
@@ -127,7 +129,8 @@ async function getRoomList(data) {
     const { userId } = data;
     const roomList = await roomSchema
       .find({ members: userId })
-      .sort({ "messages.createdAt": -1 });
+      .sort({ "messages.createdAt": -1 })
+      .populate("members");
     return roomList;
   } else {
     return new Error("failed to find by objectId");

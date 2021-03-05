@@ -8,7 +8,7 @@ const {
   updateUserSocketId,
 } = require("./services/chat/utils/userTools");
 const addMessage = require("./services/chat/utils/messageTools");
-
+const roomModel = require("./services/chat/schema/roomSchema");
 const socketServer = (server) => {
   const io = socketio(server);
   io.on("connection", (socket) => {
