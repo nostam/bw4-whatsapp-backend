@@ -14,6 +14,7 @@ async function createRoom(data) {
     const newRoomList = await getRoomList;
   }
 }
+
 async function addUserToRoom({ nickname, socketId, roomId }) {
   try {
     const user = await UserModel.findOne({ nickname });

@@ -5,6 +5,7 @@ const {
   removeMember,
   initPrivateMessage,
   getRoomList,
+  updateUserSocketId,
 } = require("./services/chat/utils/userTools");
 const addMessage = require("./services/chat/utils/messageTools");
 
@@ -12,7 +13,7 @@ const socketServer = (server) => {
   const io = socketio(server);
   io.on("connection", (socket) => {
     console.log(socket.id + " is linking");
-    //TODO auth with incoming cookies?
+    //TODO make sure all incoming event will update user schema's socketId
     socket.on("login", async (data) => {
       // update registered user socket id in db
       //data = { userId }
@@ -40,7 +41,6 @@ const socketServer = (server) => {
           ...data,
           socketId: socket.id,
         });
-        console.log("a", roomList, "b", receiverRoomList);
         if (room) {
           socket.join(room._id);
           socket.emit("PM init successfully", room.roomName);
@@ -78,12 +78,18 @@ const socketServer = (server) => {
         console.log(error);
       }
     });
-    socket.on("sendMessageToRoom", async ({ roomId, text, sender }) => {
+    socket.on("sendMessageToRoom", async ({ roomId, text, senderId }) => {
       try {
         // const user = await findBySocketId(socket.id);
+        const data = {
+          userId: senderId,
+          socketId: socket.id,
+        };
+        const res = await updateUserSocketId(data);
+        if (res) console.log("updated userDB");
         const messageContent = {
           text,
-          sender,
+          sender: senderId,
           room: roomId,
         };
         const { currentRoom } = await addMessage(
