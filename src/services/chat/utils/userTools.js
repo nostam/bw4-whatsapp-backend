@@ -119,6 +119,7 @@ async function updateUserSocketId(data) {
   const res = await UserModel.findByIdAndUpdate(data.userId, {
     socketId: data.socketId,
   });
+
   return res ? true : false;
 }
 async function getRoomList(data) {
