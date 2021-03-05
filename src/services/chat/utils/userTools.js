@@ -68,6 +68,7 @@ const initPrivateMessage = async (data) => {
     const { sender, receiver, socketId } = data;
     const roomList = await roomSchema
       .find({ members: sender })
+      .populate("members")
       .sort({ "messages.createdAt": -1 });
     const roomName = `${sender}-${receiver}`;
     roomNameAlt = `${receiver}-${sender}`;
@@ -112,6 +113,7 @@ const getRoomList = async (data) => {
     const { userId } = data;
     const roomList = await roomSchema
       .find({ members: userId })
+      .populate("members")
       .sort({ "messages.createdAt": -1 });
     return roomList;
   } else {
