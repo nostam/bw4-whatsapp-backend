@@ -80,7 +80,7 @@ const socketServer = (server) => {
         // });
         // socket.join(data.roomId);
         console.log(`${socket.id},
-        
+
         joined
         ==========================
         ${data.roomId}`);
@@ -90,6 +90,7 @@ const socketServer = (server) => {
         // } else {
         //   console.log(nickname);
         // }
+        socket.join(data.roomId);
         console.log(data);
       } catch (error) {
         console.log(error);
