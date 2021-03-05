@@ -14,14 +14,20 @@ const socketServer = (server) => {
     console.log(socket.id + " is linking");
     //TODO auth with incoming cookies?
     socket.on("login", async (data) => {
-      //data = {_id}
+      // update registered user socket id in db
+      //data = { userId }
       try {
-        const roomList = await getRoomList(data);
+        const roomList = await getRoomList({
+          ...data,
+          socketId: socket.id,
+        });
         io.sockets.connected[socket.id].emit("roomList", roomList);
       } catch (error) {
         console.log(error);
       }
     });
+    // create room for 1o1
+    // data = { sender: user._id, receiver: opponentsUser._id}
     socket.on("initOneToOne", async (data) => {
       // needed info party a & b (id?), but roomName has to be neutral and unique
       try {
@@ -34,13 +40,12 @@ const socketServer = (server) => {
           ...data,
           socketId: socket.id,
         });
+        console.log("a", roomList, "b", receiverRoomList);
         if (room) {
           socket.join(room._id);
-          // io.sockets.connected[socket.id] ====socket
           socket.emit("PM init successfully", room.roomName);
-          io.sockets.connected[socket.id].emit("roomList", roomList);
+          socket.emit("roomList", roomList);
           console.log("receiver socketId", receiverIds.socketId);
-          //TODO not sure if its is emmiting to the opponents
           if (receiverIds.socketId) {
             socket.to(receiverIds.socketId).emit("roomList", receiverRoomList);
           }
@@ -49,6 +54,7 @@ const socketServer = (server) => {
         console.log(error);
       }
     });
+    //create group
     socket.on("addUserToRoom", async (data) => {
       try {
         const { nickname, room, isExistent } = await addUserToRoom({

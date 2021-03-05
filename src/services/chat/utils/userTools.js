@@ -1,6 +1,7 @@
 const roomSchema = require("../schema/roomSchema");
 const UserModel = require("../../users/schema");
 
+const createRoom = async (data) => {};
 const addUserToRoom = async ({ nickname, socketId, roomId }) => {
   try {
     const user = await UserModel.findOne({ nickname });
@@ -100,17 +101,29 @@ const initPrivateMessage = async (data) => {
     return error;
   }
 };
-const getRoomList = async (data) => {
-  const { _id } = data;
-  const roomList = await roomSchema
-    .find({ members: _id })
-    .sort({ "messages.createdAt": -1 });
-  return roomList;
+
+const updateUserSocketId = async (data) => {
+  const res = await UserModel.findByIdAndUpdate(data.userId, { socketId });
+  return res ? true : false;
 };
+const getRoomList = async (data) => {
+  const res = updateUserSocketId(data);
+  if (res) {
+    const { userId } = data;
+    const roomList = await roomSchema
+      .find({ members: userId })
+      .sort({ "messages.createdAt": -1 });
+    return roomList;
+  } else {
+    return new Error("failed to find by objectId");
+  }
+};
+
 module.exports = {
   addUserToRoom,
   findBySocketId,
   removeMember,
   initPrivateMessage,
   getRoomList,
+  updateUserSocketId,
 };
