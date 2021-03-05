@@ -6,7 +6,7 @@ const addMessage = async (text, sender, room) => {
       { _id: room },
       {
         $addToSet: {
-          messages: { text: text, sender: sender },
+          messages: { text: text, sender: sender, createdAt: new Date() },
         },
       },
       { new: true, timestamps: true }

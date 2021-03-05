@@ -34,6 +34,8 @@ const socketServer = (server) => {
     // data = { sender: user._id, receiver: opponentsUser._id}
     socket.on("initOneToOne", async (data) => {
       // needed info party a & b (id?), but roomName has to be neutral and unique
+      console.log();
+
       try {
         const {
           room,
@@ -44,6 +46,9 @@ const socketServer = (server) => {
           ...data,
           socketId: socket.id,
         });
+
+        console.log("PM init successfully", room.roomName);
+
         if (room) {
           socket.join(room._id);
           socket.emit("PM init successfully", room.roomName);
@@ -51,6 +56,7 @@ const socketServer = (server) => {
           console.log("receiver socketId", receiverIds.socketId);
           if (receiverIds.socketId) {
             socket.to(receiverIds.socketId).emit("roomList", receiverRoomList);
+            console.log("PM init successfully", room.roomName);
           }
         }
       } catch (error) {
@@ -72,8 +78,12 @@ const socketServer = (server) => {
         //   socketId: socket.id,
         //   ...data,
         // });
-        socket.join(data.roomId);
-        console.log(`${socket.id}, joined ${data.roomId}`);
+        // socket.join(data.roomId);
+        console.log(`${socket.id},
+        
+        joined
+        ==========================
+        ${data.roomId}`);
         // if (isExistent === false) {
         //   socket.emit("userJoined", `${nickname} joined the group`);
         //   socket.to(socket.id).emit(roomList);
@@ -110,7 +120,7 @@ const socketServer = (server) => {
           messageContent.room
         );
 
-        console.log(currentRoom);
+        console.log("currentRoom", currentRoom);
       } catch (err) {
         console.log(err);
       }
