@@ -1,7 +1,22 @@
 const roomSchema = require("../schema/roomSchema");
 const UserModel = require("../../users/schema");
 
-const addUserToRoom = async ({ nickname, socketId, roomId }) => {
+async function createRoom(data) {
+  const newRoom = new roomSchema({
+    isGroup: true,
+    roomName: data.roomName,
+    members: [sender],
+    creator: sender,
+    admins: [sender],
+  });
+  const res = await newRoom.save({ validateBeforeSave: false });
+  if (res) {
+    //TODO
+    const newRoomList = await getRoomList;
+  }
+}
+
+async function addUserToRoom({ nickname, socketId, roomId }) {
   try {
     const user = await UserModel.findOne({ nickname });
     const room = await roomSchema.findOne({
@@ -33,9 +48,9 @@ const addUserToRoom = async ({ nickname, socketId, roomId }) => {
     console.log(err);
     return err;
   }
-};
+}
 
-const findBySocketId = async (socketId) => {
+async function findBySocketId(socketId) {
   try {
     const user = await UserModel.findOne({ socketId: socketId });
     // console.log(user)
@@ -44,9 +59,9 @@ const findBySocketId = async (socketId) => {
     console.log(err);
     return err;
   }
-};
+}
 
-const removeMember = async (socketId, roomId) => {
+async function removeMember(socketId, roomId) {
   try {
     const user = await UserModel.findOne({ socketId: socketId });
     const room = await roomSchema.findOne({ _id: roomId });
@@ -60,14 +75,15 @@ const removeMember = async (socketId, roomId) => {
     console.log(err);
     return err;
   }
-};
-const initPrivateMessage = async (data) => {
+}
+async function initPrivateMessage(data) {
   try {
     // data =  { sender: _id, recever: _id}
     const { sender, receiver, socketId } = data;
     const roomList = await roomSchema
       .find({ members: sender })
-      .sort({ "messages.createdAt": -1 });
+      .sort({ "messages.createdAt": -1 })
+      .populate("members");
     const roomName = `${sender}-${receiver}`;
     roomNameAlt = `${receiver}-${sender}`;
     const foundRoom = await roomSchema.findOne({
@@ -99,18 +115,34 @@ const initPrivateMessage = async (data) => {
     console.log(error);
     return error;
   }
-};
-const getRoomList = async (data) => {
-  const { _id } = data;
-  const roomList = await roomSchema
-    .find({ members: _id })
-    .sort({ "messages.createdAt": -1 });
-  return roomList;
-};
+}
+
+async function updateUserSocketId(data) {
+  const res = await UserModel.findByIdAndUpdate(data.userId, {
+    socketId: data.socketId,
+  });
+  return res ? true : false;
+}
+async function getRoomList(data) {
+  const res = updateUserSocketId(data);
+  if (res) {
+    const { userId } = data;
+    const roomList = await roomSchema
+      .find({ members: userId })
+      .sort({ "messages.createdAt": -1 })
+      .populate("members");
+    return roomList;
+  } else {
+    return new Error("failed to find by objectId");
+  }
+}
+
 module.exports = {
   addUserToRoom,
   findBySocketId,
   removeMember,
   initPrivateMessage,
   getRoomList,
+  updateUserSocketId,
+  createRoom,
 };

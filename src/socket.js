@@ -5,23 +5,30 @@ const {
   removeMember,
   initPrivateMessage,
   getRoomList,
+  updateUserSocketId,
 } = require("./services/chat/utils/userTools");
 const addMessage = require("./services/chat/utils/messageTools");
-
+const roomModel = require("./services/chat/schema/roomSchema");
 const socketServer = (server) => {
   const io = socketio(server);
   io.on("connection", (socket) => {
     console.log(socket.id + " is linking");
-    //TODO auth with incoming cookies?
+    //TODO make sure all incoming event will update user schema's socketId
     socket.on("login", async (data) => {
-      //data = {_id}
+      // update registered user socket id in db
+      // data = { userId }
       try {
-        const roomList = await getRoomList(data);
-        io.sockets.connected[socket.id].emit("roomList", roomList);
+        const roomList = await getRoomList({
+          ...data,
+          socketId: socket.id,
+        });
+        socket.emit("roomList", roomList);
       } catch (error) {
         console.log(error);
       }
     });
+    // create room for 1o1
+    // data = { sender: user._id, receiver: opponentsUser._id}
     socket.on("initOneToOne", async (data) => {
       // needed info party a & b (id?), but roomName has to be neutral and unique
       try {
@@ -36,11 +43,9 @@ const socketServer = (server) => {
         });
         if (room) {
           socket.join(room._id);
-          // io.sockets.connected[socket.id] ====socket
           socket.emit("PM init successfully", room.roomName);
-          io.sockets.connected[socket.id].emit("roomList", roomList);
+          socket.emit("roomList", roomList);
           console.log("receiver socketId", receiverIds.socketId);
-          //TODO not sure if its is emmiting to the opponents
           if (receiverIds.socketId) {
             socket.to(receiverIds.socketId).emit("roomList", receiverRoomList);
           }
@@ -48,6 +53,13 @@ const socketServer = (server) => {
       } catch (error) {
         console.log(error);
       }
+    });
+    //create group, only creator
+    socket.on("createRoom", async (data) => {
+      //data = {senderId, roomName }
+      try {
+        const res = await createRoom(data);
+      } catch (error) {}
     });
     socket.on("addUserToRoom", async (data) => {
       try {
@@ -66,12 +78,18 @@ const socketServer = (server) => {
         console.log(error);
       }
     });
-    socket.on("sendMessageToRoom", async ({ roomId, text }) => {
+    socket.on("sendMessageToRoom", async ({ roomId, text, senderId }) => {
       try {
-        const user = await findBySocketId(socket.id);
+        // const user = await findBySocketId(socket.id);
+        const data = {
+          userId: senderId,
+          socketId: socket.id,
+        };
+        const res = await updateUserSocketId(data);
+        if (res) console.log("updated userDB");
         const messageContent = {
-          text: text,
-          sender: user._id,
+          text,
+          sender: senderId,
           room: roomId,
         };
         const { currentRoom } = await addMessage(
