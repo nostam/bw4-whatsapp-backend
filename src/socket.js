@@ -16,13 +16,13 @@ const socketServer = (server) => {
     //TODO make sure all incoming event will update user schema's socketId
     socket.on("login", async (data) => {
       // update registered user socket id in db
-      //data = { userId }
+      // data = { userId }
       try {
         const roomList = await getRoomList({
           ...data,
           socketId: socket.id,
         });
-        io.sockets.connected[socket.id].emit("roomList", roomList);
+        socket.emit("roomList", roomList);
       } catch (error) {
         console.log(error);
       }

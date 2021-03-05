@@ -81,7 +81,6 @@ async function initPrivateMessage(data) {
     const { sender, receiver, socketId } = data;
     const roomList = await roomSchema
       .find({ members: sender })
-      .populate("members")
       .sort({ "messages.createdAt": -1 });
     const roomName = `${sender}-${receiver}`;
     roomNameAlt = `${receiver}-${sender}`;
@@ -117,7 +116,9 @@ async function initPrivateMessage(data) {
 }
 
 async function updateUserSocketId(data) {
-  const res = await UserModel.findByIdAndUpdate(data.userId, { socketId });
+  const res = await UserModel.findByIdAndUpdate(data.userId, {
+    socketId: data.socketId,
+  });
   return res ? true : false;
 }
 async function getRoomList(data) {
@@ -126,7 +127,6 @@ async function getRoomList(data) {
     const { userId } = data;
     const roomList = await roomSchema
       .find({ members: userId })
-      .populate("members")
       .sort({ "messages.createdAt": -1 });
     return roomList;
   } else {
