@@ -56,7 +56,7 @@ const socketServer = (server) => {
     });
     //create group, only creator
     socket.on("createRoom", async (data) => {
-      //data = {sender: userId}
+      //data = {sender: userId, roomName }
       try {
         const res = await createRoom(data);
       } catch (error) {}
@@ -78,12 +78,12 @@ const socketServer = (server) => {
         console.log(error);
       }
     });
-    socket.on("sendMessageToRoom", async ({ roomId, text }) => {
+    socket.on("sendMessageToRoom", async ({ roomId, text, sender }) => {
       try {
-        const user = await findBySocketId(socket.id);
+        // const user = await findBySocketId(socket.id);
         const messageContent = {
-          text: text,
-          sender: user._id,
+          text,
+          sender,
           room: roomId,
         };
         const { currentRoom } = await addMessage(

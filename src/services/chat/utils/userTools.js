@@ -1,8 +1,20 @@
 const roomSchema = require("../schema/roomSchema");
 const UserModel = require("../../users/schema");
 
-const createRoom = async (data) => {};
-const addUserToRoom = async ({ nickname, socketId, roomId }) => {
+async function createRoom(data) {
+  const newRoom = new roomSchema({
+    isGroup: true,
+    roomName: data.roomName,
+    members: [sender],
+    creator: sender,
+    admins: [sender],
+  });
+  const res = await newRoom.save({ validateBeforeSave: false });
+  if (res) {
+    const newRoomList = await getRoomList;
+  }
+}
+async function addUserToRoom({ nickname, socketId, roomId }) {
   try {
     const user = await UserModel.findOne({ nickname });
     const room = await roomSchema.findOne({
@@ -34,9 +46,9 @@ const addUserToRoom = async ({ nickname, socketId, roomId }) => {
     console.log(err);
     return err;
   }
-};
+}
 
-const findBySocketId = async (socketId) => {
+async function findBySocketId(socketId) {
   try {
     const user = await UserModel.findOne({ socketId: socketId });
     // console.log(user)
@@ -45,9 +57,9 @@ const findBySocketId = async (socketId) => {
     console.log(err);
     return err;
   }
-};
+}
 
-const removeMember = async (socketId, roomId) => {
+async function removeMember(socketId, roomId) {
   try {
     const user = await UserModel.findOne({ socketId: socketId });
     const room = await roomSchema.findOne({ _id: roomId });
@@ -61,8 +73,8 @@ const removeMember = async (socketId, roomId) => {
     console.log(err);
     return err;
   }
-};
-const initPrivateMessage = async (data) => {
+}
+async function initPrivateMessage(data) {
   try {
     // data =  { sender: _id, recever: _id}
     const { sender, receiver, socketId } = data;
@@ -101,13 +113,13 @@ const initPrivateMessage = async (data) => {
     console.log(error);
     return error;
   }
-};
+}
 
-const updateUserSocketId = async (data) => {
+async function updateUserSocketId(data) {
   const res = await UserModel.findByIdAndUpdate(data.userId, { socketId });
   return res ? true : false;
-};
-const getRoomList = async (data) => {
+}
+async function getRoomList(data) {
   const res = updateUserSocketId(data);
   if (res) {
     const { userId } = data;
@@ -119,7 +131,7 @@ const getRoomList = async (data) => {
   } else {
     return new Error("failed to find by objectId");
   }
-};
+}
 
 module.exports = {
   addUserToRoom,
@@ -128,4 +140,5 @@ module.exports = {
   initPrivateMessage,
   getRoomList,
   updateUserSocketId,
+  createRoom,
 };
