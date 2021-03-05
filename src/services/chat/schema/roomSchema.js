@@ -10,6 +10,7 @@ const RoomSchema = new Schema(
       default:
         "http://getdrawings.com/free-icon-bw/best-group-icon-for-whatsapp-6.png",
     },
+    description: { type: String },
     creator: { type: Schema.Types.ObjectId, ref: "users" },
     admins: [{ type: Schema.Types.ObjectId, ref: "users" }],
     isGroup: {
